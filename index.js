@@ -10,10 +10,9 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-  origin: "https://vcfe.vercel.app",
-  methods: ["GET", "POST"]
-}
-
+    origin: "*", // for testing (later restrict)
+    methods: ["GET", "POST"]
+  }
 });
 
 const rooms = {};
@@ -33,12 +32,11 @@ io.on("connection", (socket) => {
     socket.join(roomId);
 
     socket.emit("all-users", rooms[roomId].filter(id => id !== socket.id));
-
     socket.to(roomId).emit("user-joined", socket.id);
   });
 
   socket.on("sending-signal", (payload) => {
-    io.to(payload.userToSignal).emit("user-signal", {
+    io.to(payload.userToSignal).emit("receiving-signal", {
       signal: payload.signal,
       callerId: payload.callerId,
     });
@@ -59,4 +57,8 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(3000, () => console.log("Server running on 5000"));
+const PORT = process.env.PORT || 3000;
+
+server.listen(PORT, () => {
+  console.log("Server running on", PORT);
+});
