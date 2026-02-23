@@ -103,6 +103,26 @@ io.on("connection", (socket) => {
   });
 
   // =========================
+// MUTE STATE SYNC
+// =========================
+socket.on("mute-state-changed", ({ userId, isMuted }) => {
+  console.log("Server received mute:", userId, isMuted);
+
+  for (const roomId in rooms) {
+    if (rooms[roomId].users[socket.id]) {
+      console.log("Broadcasting to room:", roomId);
+
+      socket.to(roomId).emit("mute-state-changed", {
+        userId,
+        isMuted,
+      });
+
+      break;
+    }
+  }
+});
+
+  // =========================
   // DISCONNECT
   // =========================
   socket.on("disconnect", () => {
